@@ -1,0 +1,22 @@
+# Test Dockerfile for API service
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY requirements.txt requirements-test.txt .
+RUN pip install --no-cache-dir -r requirements.txt -r requirements-test.txt
+
+# Copy application code
+COPY . .
+
+# Run tests
+CMD ["pytest", "-v", "--cov=.", "--cov-report=term-missing"]

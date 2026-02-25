@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  test-chromadb:
+    image: chromadb/chroma:latest
+    container_name: test-chromadb
+    ports:
+      - "18000:8000"
+    environment:
+      - IS_PERSISTENT=FALSE
+      - ANONYMIZED_TELEMETRY=FALSE
+
+  test-postgres:
+    image: postgres:15-alpine
+    container_name: test-postgres
+    ports:
+      - "15432:5432"
+    environment:
+      - POSTGRES_DB=test_supermemory
+      - POSTGRES_USER=test_user
+      - POSTGRES_PASSWORD=test_password
+
+  test-redis:
+    image: redis:7-alpine
+    container_name: test-redis
+    ports:
+      - "16379:6379"
+
+  test-api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.test
+    container_name: test-api
+    ports:
+      - "18080:8080"
+    environment:
+      - CHROMADB_HOST=test-chromadb
+      - CHROMADB_PORT=8000
+      - POSTGRES_HOST=test-postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=test_supermemory
+      - POSTGRES_USER=test_user
+      - POSTGRES_PASSWORD=test_password
+      - REDIS_HOST=test-redis
+      - REDIS_PORT=6379
+      - TEST_MODE=true
+    depends_on:
+      - test-chromadb
+      - test-postgres
+      - test-redis
+
+  test-web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.test
+    container_name: test-web
+    ports:
+      - "13000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://test-api:8080
+      - TEST_MODE=true
+    depends_on:
+      - test-api
