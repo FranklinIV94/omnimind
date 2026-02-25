@@ -1,6 +1,99 @@
-# OmniMind - ALBS Knowledge Management System
+# OmniMind - Hybrid Knowledge Management System
 
-A self-hosted alternative to Supermemory AI for All Lines Business Solutions. Provides autonomous document organization, semantic search, and AI agent memory management.
+**Combining Google AI Studio's beautiful UI with our scalable, local-first architecture.**
+
+A self-hosted knowledge management system for All Lines Business Solutions that provides autonomous document organization, semantic search, and AI agent memory management.
+
+## 🎯 Hybrid Architecture
+
+OmniMind combines the best of both worlds:
+
+### **From Google AI Studio:**
+- ✅ Beautiful React UI with animations
+- ✅ Multimodal file support (text, images, audio, video)
+- ✅ Quick development setup
+- ✅ Gemini API integration (optional)
+
+### **From Our Foundation:**
+- ✅ Local-first AI (Sentence Transformers)
+- ✅ Scalable architecture (PostgreSQL + ChromaDB)
+- ✅ Production deployment on N150 mini PC
+- ✅ Docker Compose + CI/CD pipeline
+- ✅ Cost-effective ($10/year operation)
+
+## 🏗️ Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    OmniMind Hybrid Architecture              │
+├─────────────────────────────────────────────────────────────┤
+│  Frontend (Google's UI)  │  Backend (Our Foundation)        │
+│  • React + TypeScript    │  • FastAPI + Python              │
+│  • Tailwind CSS          │  • PostgreSQL + ChromaDB         │
+│  • Vite build system     │  • Sentence Transformers         │
+│  • Beautiful animations  │  • Redis caching                 │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                    ┌───────▼───────┐
+                    │  Compatibility │
+                    │     Layer      │
+                    │  • Same API   │
+                    │  • Data sync  │
+                    └───────────────┘
+```
+
+## 🚀 Getting Started
+
+### Option A: Quick Development (Google's Setup)
+```bash
+# Clone repository
+git clone https://github.com/FranklinIV94/omnimind.git
+cd omnimind/web
+
+# Install dependencies
+npm install
+
+# Set up environment
+cp .env.example .env.local
+# Add GEMINI_API_KEY if using Gemini
+
+# Run development server
+npm run dev
+# Access at http://localhost:3000
+```
+
+### Option B: Local Production (Hybrid Setup)
+```bash
+# Clone repository
+git clone https://github.com/FranklinIV94/omnimind.git
+cd omnimind
+
+# Start hybrid development environment
+docker-compose -f docker-compose.dev.yml up
+
+# Access:
+# - Google's UI: http://localhost:3000
+# - Our API: http://localhost:8080
+# - API docs: http://localhost:8080/docs
+```
+
+### Option C: N150 Production (Full Deployment)
+```bash
+# Clone repository
+git clone https://github.com/FranklinIV94/omnimind.git
+cd omnimind
+
+# Automated N150 setup
+chmod +x scripts/setup-n150.sh
+sudo ./scripts/setup-n150.sh
+
+# Or manual setup
+cp .env.example .env
+# Edit .env with your configuration
+docker-compose up -d
+
+# Access at http://your-n150-ip:3000
+```
 
 ## 🎯 Project Vision
 

@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  # Google AI Studio's Express.js backend (for compatibility)
+  express-backend:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      target: development
+    container_name: omnimind-express
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - PORT=3000
+    command: npm run dev
+
+  # Our FastAPI backend (for production features)
+  fastapi-backend:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      target: development
+    container_name: omnimind-fastapi
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./api:/app
+    environment:
+      - MODEL_NAME=all-MiniLM-L6-v2
+      - CHROMADB_HOST=chromadb
+      - CHROMADB_PORT=8000
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=omnimind
+      - POSTGRES_USER=albs_admin
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-ChangeMe123!}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - chromadb
+      - postgres
+      - redis
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8080 --reload
+
+  # Development ChromaDB
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: omnimind-chromadb-dev
+    ports:
+      - "8000:8000"
+    environment:
+      - IS_PERSISTENT=FALSE
+      - ANONYMIZED_TELEMETRY=FALSE
+    volumes:
+      - ./data/chroma-dev:/chroma/chroma
+
+  # Development PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: omnimind-postgres-dev
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=omnimind
+      - POSTGRES_USER=albs_admin
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-ChangeMe123!}
+    volumes:
+      - ./data/postgres-dev:/var/lib/postgresql/data
+
+  # Development Redis
+  redis:
+    image: redis:7-alpine
+    container_name: omnimind-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis-dev:/data
+    command: redis-server --appendonly yes
+
+  # SQLite (for Google's original setup compatibility)
+  sqlite-proxy:
+    image: alpine:latest
+    container_name: omnimind-sqlite-proxy
+    volumes:
+      - ./data/sqlite:/data
+    command: >
+      sh -c "
+      echo 'SQLite data directory created at /data'
+      tail -f /dev/null
+      "
+
+volumes:
+  chroma-dev:
+  postgres-dev:
+  redis-dev:
+  sqlite-data:
+
+networks:
+  default:
+    name: omnimind-dev-network
+    driver: bridge
