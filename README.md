@@ -85,7 +85,7 @@ Create a localized knowledge management system that:
 ### Quick Start
 ```bash
 # Clone repository
-git clone https://github.com/alllinesbusiness/local-supermemory.git
+git clone https://github.com/FranklinIV94/local-supermemory.git
 cd local-supermemory
 
 # Copy environment configuration
@@ -97,6 +97,11 @@ docker-compose up -d
 # Access web interface
 open http://localhost:3000
 ```
+
+### Repository
+- **GitHub:** https://github.com/FranklinIV94/local-supermemory
+- **Status:** Initial commit - development phase
+- **CI/CD:** GitHub Actions configured
 
 ## 🛠️ Technology Stack
 
