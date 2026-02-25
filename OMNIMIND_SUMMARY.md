@@ -1,4 +1,4 @@
-# Local Supermemory - Project Summary
+# OmniMind - Project Summary
 
 ## 📋 Executive Summary
 

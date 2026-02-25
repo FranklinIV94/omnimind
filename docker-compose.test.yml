@@ -16,7 +16,7 @@ services:
     ports:
       - "15432:5432"
     environment:
-      - POSTGRES_DB=test_supermemory
+      - POSTGRES_DB=test_omnimind
       - POSTGRES_USER=test_user
       - POSTGRES_PASSWORD=test_password
 
@@ -38,7 +38,7 @@ services:
       - CHROMADB_PORT=8000
       - POSTGRES_HOST=test-postgres
       - POSTGRES_PORT=5432
-      - POSTGRES_DB=test_supermemory
+      - POSTGRES_DB=test_omnimind
       - POSTGRES_USER=test_user
       - POSTGRES_PASSWORD=test_password
       - REDIS_HOST=test-redis

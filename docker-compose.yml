@@ -4,7 +4,7 @@ services:
   # Vector Database - ChromaDB
   chromadb:
     image: chromadb/chroma:latest
-    container_name: local-supermemory-chromadb
+    container_name: omnimind-chromadb
     ports:
       - "8000:8000"
     volumes:
@@ -24,13 +24,13 @@ services:
   # Metadata Database - PostgreSQL
   postgres:
     image: postgres:15-alpine
-    container_name: local-supermemory-postgres
+    container_name: omnimind-postgres
     ports:
       - "5432:5432"
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=supermemory
+      - POSTGRES_DB=omnimind
       - POSTGRES_USER=albs_admin
       - POSTGRES_PASSWORD=${DB_PASSWORD:-ChangeMe123!}
     restart: unless-stopped
@@ -43,7 +43,7 @@ services:
   # Cache - Redis
   redis:
     image: redis:7-alpine
-    container_name: local-supermemory-redis
+    container_name: omnimind-redis
     ports:
       - "6379:6379"
     volumes:
@@ -59,7 +59,7 @@ services:
   # Document Processing Service
   processor:
     build: ./processor
-    container_name: local-supermemory-processor
+    container_name: omnimind-processor
     volumes:
       - ./inbox:/inbox:ro
       - ./processed:/processed
@@ -70,7 +70,7 @@ services:
       - CHROMADB_PORT=8000
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
-      - POSTGRES_DB=supermemory
+      - POSTGRES_DB=omnimind
       - POSTGRES_USER=albs_admin
       - POSTGRES_PASSWORD=${DB_PASSWORD:-ChangeMe123!}
       - REDIS_HOST=redis
@@ -88,7 +88,7 @@ services:
   # API Server
   api:
     build: ./api
-    container_name: local-supermemory-api
+    container_name: omnimind-api
     ports:
       - "8080:8080"
     volumes:
@@ -99,7 +99,7 @@ services:
       - CHROMADB_PORT=8000
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
-      - POSTGRES_DB=supermemory
+      - POSTGRES_DB=omnimind
       - POSTGRES_USER=albs_admin
       - POSTGRES_PASSWORD=${DB_PASSWORD:-ChangeMe123!}
       - REDIS_HOST=redis
@@ -118,7 +118,7 @@ services:
   # Web Interface
   web:
     build: ./web
-    container_name: local-supermemory-web
+    container_name: omnimind-web
     ports:
       - "3000:3000"
     volumes:
@@ -134,7 +134,7 @@ services:
   # Watch Folder Monitor
   watcher:
     build: ./watcher
-    container_name: local-supermemory-watcher
+    container_name: omnimind-watcher
     volumes:
       - ./watch:/watch:ro
       - ./inbox:/inbox
@@ -148,7 +148,7 @@ services:
   # Backup Service
   backup:
     image: alpine:latest
-    container_name: local-supermemory-backup
+    container_name: omnimind-backup
     volumes:
       - ./data:/backup/source
       - ./backups:/backup/destination
@@ -180,5 +180,5 @@ volumes:
 
 networks:
   default:
-    name: local-supermemory-network
+    name: omnimind-network
     driver: bridge

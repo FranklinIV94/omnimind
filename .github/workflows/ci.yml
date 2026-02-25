@@ -89,8 +89,8 @@ jobs:
       uses: docker/metadata-action@v5
       with:
         images: |
-          ghcr.io/${{ github.repository_owner }}/local-supermemory-api
-          ghcr.io/${{ github.repository_owner }}/local-supermemory-web
+          ghcr.io/${{ github.repository_owner }}/omnimind-api
+          ghcr.io/${{ github.repository_owner }}/omnimind-web
         tags: |
           type=ref,event=branch
           type=ref,event=pr

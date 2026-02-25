@@ -1,4 +1,4 @@
-# Local Supermemory - ALBS Knowledge Management System
+# OmniMind - ALBS Knowledge Management System
 
 A self-hosted alternative to Supermemory AI for All Lines Business Solutions. Provides autonomous document organization, semantic search, and AI agent memory management.
 
@@ -85,8 +85,8 @@ Create a localized knowledge management system that:
 ### Quick Start
 ```bash
 # Clone repository
-git clone https://github.com/FranklinIV94/local-supermemory.git
-cd local-supermemory
+git clone https://github.com/FranklinIV94/omnimind.git
+cd omnimind
 
 # Copy environment configuration
 cp .env.example .env
@@ -99,7 +99,7 @@ open http://localhost:3000
 ```
 
 ### Repository
-- **GitHub:** https://github.com/FranklinIV94/local-supermemory
+- **GitHub:** https://github.com/FranklinIV94/omnimind
 - **Status:** Initial commit - development phase
 - **CI/CD:** GitHub Actions configured
 

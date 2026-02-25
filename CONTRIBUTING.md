@@ -1,6 +1,6 @@
-# Contributing to Local Supermemory
+# Contributing to OmniMind
 
-Thank you for your interest in contributing to the ALBS Local Supermemory project! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to the ALBS OmniMind project! This document provides guidelines and instructions for contributing.
 
 ## 🎯 Development Philosophy
 
@@ -15,11 +15,11 @@ Thank you for your interest in contributing to the ALBS Local Supermemory projec
 ```bash
 # Fork the repository on GitHub
 # Clone your fork
-git clone https://github.com/YOUR-USERNAME/local-supermemory.git
-cd local-supermemory
+git clone https://github.com/YOUR-USERNAME/omnimind.git
+cd omnimind
 
 # Add upstream remote
-git remote add upstream https://github.com/alllinesbusiness/local-supermemory.git
+git remote add upstream https://github.com/alllinesbusiness/omnimind.git
 ```
 
 ### 2. Set Up Development Environment
@@ -73,7 +73,7 @@ docker-compose -f docker-compose.dev.yml up
 ## 🏗️ Project Structure
 
 ```
-local-supermemory/
+omnimind/
 ├── api/                    # FastAPI backend
 │   ├── src/
 │   │   ├── routes/        # API endpoints
