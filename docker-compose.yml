@@ -1,0 +1,184 @@
+version: '3.8'
+
+services:
+  # Vector Database - ChromaDB
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: local-supermemory-chromadb
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data/chroma:/chroma/chroma
+      - ./models:/models
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/chroma/chroma
+      - ANONYMIZED_TELEMETRY=FALSE
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Metadata Database - PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: local-supermemory-postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=supermemory
+      - POSTGRES_USER=albs_admin
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-ChangeMe123!}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U albs_admin"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Cache - Redis
+  redis:
+    image: redis:7-alpine
+    container_name: local-supermemory-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Document Processing Service
+  processor:
+    build: ./processor
+    container_name: local-supermemory-processor
+    volumes:
+      - ./inbox:/inbox:ro
+      - ./processed:/processed
+      - ./data/models:/app/models
+      - ./config:/app/config
+    environment:
+      - CHROMADB_HOST=chromadb
+      - CHROMADB_PORT=8000
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=supermemory
+      - POSTGRES_USER=albs_admin
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-ChangeMe123!}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MODEL_NAME=all-MiniLM-L6-v2
+    depends_on:
+      chromadb:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # API Server
+  api:
+    build: ./api
+    container_name: local-supermemory-api
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data/models:/app/models
+      - ./config:/app/config
+    environment:
+      - CHROMADB_HOST=chromadb
+      - CHROMADB_PORT=8000
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=supermemory
+      - POSTGRES_USER=albs_admin
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-ChangeMe123!}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - API_KEY=${API_KEY:-GenerateSecureKeyHere}
+      - JWT_SECRET=${JWT_SECRET:-AnotherSecureSecret}
+    depends_on:
+      chromadb:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Web Interface
+  web:
+    build: ./web
+    container_name: local-supermemory-web
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./web/public:/app/public
+      - ./web/src:/app/src
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8080/ws
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  # Watch Folder Monitor
+  watcher:
+    build: ./watcher
+    container_name: local-supermemory-watcher
+    volumes:
+      - ./watch:/watch:ro
+      - ./inbox:/inbox
+    environment:
+      - API_URL=http://api:8080
+      - API_KEY=${API_KEY:-GenerateSecureKeyHere}
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  # Backup Service
+  backup:
+    image: alpine:latest
+    container_name: local-supermemory-backup
+    volumes:
+      - ./data:/backup/source
+      - ./backups:/backup/destination
+    command: >
+      sh -c "
+      echo 'Starting backup service...' &&
+      while true; do
+        # Daily incremental backup at 2 AM
+        if [ $$(date +%H) -eq 02 ]; then
+          echo '$$(date): Running daily backup' &&
+          tar -czf /backup/destination/incremental-$$(date +%Y%m%d).tar.gz --newer-mtime='1 day ago' /backup/source &&
+          echo '$$(date): Backup completed'
+        fi &&
+        # Weekly full backup on Sunday at 3 AM
+        if [ $$(date +%u) -eq 7 ] && [ $$(date +%H) -eq 03 ]; then
+          echo '$$(date): Running weekly full backup' &&
+          tar -czf /backup/destination/full-$$(date +%Y%m%d).tar.gz /backup/source &&
+          echo '$$(date): Full backup completed'
+        fi &&
+        sleep 3600
+      done
+      "
+    restart: unless-stopped
+
+volumes:
+  chroma-data:
+  postgres-data:
+  redis-data:
+
+networks:
+  default:
+    name: local-supermemory-network
+    driver: bridge
